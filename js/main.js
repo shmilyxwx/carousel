@@ -4,52 +4,67 @@ var isGo = false;
 var imgWidth = 400;
 var imgLength = $(".imgbox img").length
 $(".next").on('click',function(){
-	if(isGo){
+	if(isGo)
 		return
-	}
+
 	isGo = true
 
-	var nowLeft =  offset(-imgWidth)
+	var nowLeft =  carousel.offset(-imgWidth)
 	$(".imgbox").animate({"margin-left":nowLeft},function(){
 		index ++;
-		if(margin()==-(imgLength-1)*imgWidth){
+		if(carousel.margin()==-(imgLength-1)*imgWidth){
 			index = 0
-			$(".imgbox").css("margin-left",""+(-imgWidth)+"px")
+			carousel.reset(-imgWidth)
 		}
-		setDOt()
+		carousel.setDOt()
 		isGo = false
 	})
 })
 $(".prev").on('click',function(){
-	if(isGo){
+	if(isGo)
 		return
-	}
+	
 	isGo = true
 
-	var nowLeft =  offset(imgWidth)
+	var nowLeft =  carousel.offset(imgWidth)
 	$(".imgbox").animate({"margin-left":nowLeft},function(){
 		index --;
-		if(margin()==-0){
+		if(carousel.margin()==-0){
 			index = imgLength-3
-			$(".imgbox").css("margin-left",""+(-(imgLength-2)*imgWidth)+"px")
+			carousel.reset(-(imgLength-2)*imgWidth)
 		}
-		setDOt()
+		carousel.setDOt()
 		isGo = false
 	})
 })
-//设置便宜距离
-function offset(imgWidth){
-	var nowLeft =  margin()+imgWidth;
-	return nowLeft;
+
+var carousel = {
+	//临界条件重置位置
+	reset(distance){
+		$(".imgbox").css("margin-left",distance+"px")
+	},
+		
+	//设置便宜距离
+	offset(imgWidth){
+		var nowLeft =  this.margin()+imgWidth;
+		return nowLeft;
+	},
+	//获取当前距离margin-left距离
+	margin(){
+		return parseInt($(".imgbox").css('margin-left'))
+	},
+	//设置原点高亮
+	setDOt(){
+		$(".dot > span").eq(index).addClass('active').siblings().removeClass('active')
+	},
+	//定时器轮播
+	timeSet(){
+		return	setInterval(()=>{
+			$(".next").trigger('click')
+		},1000)
+	}
 }
-//获取当前距离margin-left距离
-function margin(){
-	return parseInt($(".imgbox").css('margin-left'))
-}
-//设置原点高亮
-function setDOt(){
-	$(".dot > span").eq(index).addClass('active').siblings().removeClass('active')
-}
+
 
 //原点事件
 $(".dot > span").on('click',function(){
@@ -59,20 +74,15 @@ $(".dot > span").on('click',function(){
 	if(!offsetIndex){
 		return;
 	}
-	oldOffset = margin() - offsetIndex*imgWidth
-	$(this).addClass('active').siblings().removeClass('active')
+	oldOffset = carousel.margin() - offsetIndex*imgWidth
 	$(".imgbox").animate({'margin-left':oldOffset})
 	index = nowIndex
+	carousel.setDOt()
 })
 
-var timeId = timeSet()
+var timeId = carousel.timeSet()
 
 
-function timeSet(){
-	return	setInterval(()=>{
-		$(".next").trigger('click')
-	},1000)
-}
 
 
 $(".imgbox,.next,.prev,.dot").on('mouseenter',function(){
@@ -80,6 +90,6 @@ $(".imgbox,.next,.prev,.dot").on('mouseenter',function(){
 })
 $(".imgbox,.next,.prev,.dot").on('mouseleave',function(){
 	clearInterval(timeId)
-	timeId = timeSet()
+	timeId = carousel.timeSet()
 })
 
